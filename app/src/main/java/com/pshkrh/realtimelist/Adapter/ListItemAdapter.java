@@ -80,6 +80,7 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
 
                 mainActivity.isUpdate = true;
                 mainActivity.idUpdate = todoList.get(position).getId();
+                mainActivity.globalUpdateIndex = todoList.get(position).getPosition(position);
 
             }
         });

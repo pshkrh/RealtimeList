@@ -23,6 +23,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
     List<ToDo> mToDoList = new ArrayList<>();
     FirebaseFirestore db;
+    FirebaseUser user;
 
     RecyclerView listItem;
     RecyclerView.LayoutManager mLayoutManager;
@@ -57,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     public MaterialEditText title, description;
     public boolean isUpdate = false;
     public String idUpdate = "";
+    public int globalDeleteIndex = 0;
+    public int globalUpdateIndex = 0;
 
     ListItemAdapter mListItemAdapter;
 
@@ -110,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
                     description.setText("");
                 }
                 else{
-                    mAlertDialog.show();
                     updateData(title.getText().toString(),description.getText().toString());
                     isUpdate = !isUpdate;
                 }
@@ -126,26 +129,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateData(String title, String description) {
-        db.collection("ToDoList").document(idUpdate)
-                .update("title",title,"description",description)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toasty.info(MainActivity.this, "Updated Task", Toast.LENGTH_SHORT, true).show();
-                    }
-                });
+        String author = mToDoList.get(globalUpdateIndex).getUsername();
+        if(username.equals(author)){
+            mAlertDialog.show();
+            db.collection("ToDoList").document(idUpdate)
+                    .update("title",title,"description",description)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toasty.info(MainActivity.this, "Updated Task", Toast.LENGTH_SHORT, true).show();
+                            //globalUpdateId = idUpdate;
+                        }
+                    });
 
-        db.collection("ToDoList").document(idUpdate)
-                .addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                    @Override
-                    public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
-                        loadData();
-                    }
-                });
+            db.collection("ToDoList").document(idUpdate)
+                    .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                        @Override
+                        public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                            loadData();
+                        }
+                    });
+        }
+        else{
+            Toasty.error(MainActivity.this,"You cannot edit someone else's task", Toast.LENGTH_LONG, true).show();
+        }
+
     }
 
     private void setData(String title, String description, String username) {
-        String id = UUID.randomUUID().toString();
+        final String id = UUID.randomUUID().toString();
         Map<String,Object> todo = new HashMap<>();
         todo.put("id",id);
         todo.put("title",title);
@@ -159,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(Void aVoid) {
                         //Refresh the data
                         loadData();
+                        idUpdate = id;
                     }
                 });
     }
@@ -168,32 +181,7 @@ public class MainActivity extends AppCompatActivity {
         if(mToDoList.size()>0){
             mToDoList.clear();
         }
-        /*db.collection("ToDoList")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        for(DocumentSnapshot doc : task.getResult()){
-                            ToDo todo = new ToDo(doc.getString("id"),
-                                    doc.getString("title"),
-                                    doc.getString("description"),
-                                    doc.getString("username"));
-
-                            mToDoList.add(todo);
-                        }
-                        mListItemAdapter = new ListItemAdapter(MainActivity.this, mToDoList);
-                        listItem.setAdapter(mListItemAdapter);
-                        mAlertDialog.dismiss();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toasty.error(MainActivity.this, ""+e.getMessage(), Toast.LENGTH_SHORT, true).show();
-                    }
-                });*/
-
-        //Document Listener
+        //Collection Listener
         db.collection("ToDoList")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
@@ -217,8 +205,12 @@ public class MainActivity extends AppCompatActivity {
                                     mAlertDialog.dismiss();
                                     break;
                                 case MODIFIED:
+                                    String tempUpdateTitle = dc.getDocument().getData().get("title").toString();
+                                    String tempUpdateDesc = dc.getDocument().getData().get("description").toString();
+                                    updateData(tempUpdateTitle,tempUpdateDesc);
                                     break;
                                 case REMOVED:
+                                    deleteTask(globalDeleteIndex);
                                     break;
                                 default:
                                     break;
@@ -234,21 +226,30 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         if(item.getTitle().equals("Delete Task")){
-            deleteItem(item.getOrder());
+            deleteTask(item.getOrder());
         }
         return super.onContextItemSelected(item);
     }
 
-    private void deleteItem(int index) {
-        db.collection("ToDoList")
-                .document(mToDoList.get(index).getId())
-                .delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        loadData();
-                    }
-                });
+    private void deleteTask(final int index) {
+        String author = mToDoList.get(index).getUsername();
+        if(username.equals(author)){
+            db.collection("ToDoList")
+                    .document(mToDoList.get(index).getId())
+                    .delete()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            loadData();
+                            globalDeleteIndex = index;
+                            Toasty.info(MainActivity.this, "Deleted Task", Toast.LENGTH_SHORT, true).show();
+                        }
+                    });
+        }
+        else{
+            Toasty.error(MainActivity.this,"You cannot delete someone else's task",Toast.LENGTH_SHORT,true).show();
+        }
+
     }
 
     @Override

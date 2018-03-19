@@ -32,4 +32,8 @@ public class ToDo {
     public String getUsername() {
         return username;
     }
+
+    public int getPosition(int position){
+        return position;
+    }
 }
