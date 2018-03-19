@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">To-Do List</string>
+    <string name="task_title">Title</string>
+    <string name="task_description">Description</string>
+    <string name="splash">Realtime To-Do List</string>
+    <string name="posted_by">Posted By:&#160;</string>
+    <string name="sign_out">Sign Out</string>
+</resources>
