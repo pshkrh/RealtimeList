@@ -75,36 +75,6 @@ public class MainActivity extends AppCompatActivity {
         //Initialize Firestore
         db = FirebaseFirestore.getInstance();
 
-        //Document Listener
-        db.collection("cities")
-                .whereEqualTo("state", "CA")
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot snapshots,
-                                        @Nullable FirebaseFirestoreException e) {
-                        if (e != null) {
-                            System.err.println("Listen failed: " + e);
-                            return;
-                        }
-
-                        for (DocumentChange dc : snapshots.getDocumentChanges()) {
-                            switch (dc.getType()) {
-                                case ADDED:
-
-                                    break;
-                                case MODIFIED:
-
-                                    break;
-                                case REMOVED:
-
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    }
-                });
-
         //Initialize all views
         mAlertDialog = new SpotsDialog(this);
         title = (MaterialEditText)findViewById(R.id.task_title);
@@ -198,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         if(mToDoList.size()>0){
             mToDoList.clear();
         }
-        db.collection("ToDoList")
+        /*db.collection("ToDoList")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -220,6 +190,43 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Toasty.error(MainActivity.this, ""+e.getMessage(), Toast.LENGTH_SHORT, true).show();
+                    }
+                });*/
+
+        //Document Listener
+        db.collection("ToDoList")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot snapshots,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            System.err.println("Listen failed: " + e);
+                            return;
+                        }
+
+                        for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    mAlertDialog.show();
+                                    String tempId = dc.getDocument().getData().get("id").toString();
+                                    String tempTitle = dc.getDocument().getData().get("title").toString();
+                                    String tempDesc = dc.getDocument().getData().get("description").toString();
+                                    String tempUser = dc.getDocument().getData().get("username").toString();
+                                    ToDo todo = new ToDo(tempId,tempTitle,tempDesc,tempUser);
+                                    mToDoList.add(todo);
+                                    mAlertDialog.dismiss();
+                                    break;
+                                case MODIFIED:
+                                    break;
+                                case REMOVED:
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        mListItemAdapter = new ListItemAdapter(MainActivity.this, mToDoList);
+                        listItem.setAdapter(mListItemAdapter);
+                        mAlertDialog.dismiss();
                     }
                 });
     }
@@ -264,5 +271,7 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+
 
 }
