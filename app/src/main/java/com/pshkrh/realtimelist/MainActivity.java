@@ -122,12 +122,12 @@ public class MainActivity extends AppCompatActivity {
                     {
                         mAlertDialog.show();
                     }
-                    setData(title.getText().toString(),description.getText().toString(),username);
+                    addTasks(title.getText().toString(),description.getText().toString(),username);
                     title.setText("");
                     description.setText("");
                 }
                 else{
-                    updateData(title.getText().toString(),description.getText().toString());
+                    updateTasks(title.getText().toString(),description.getText().toString());
                     isUpdate = !isUpdate;
                 }
             }
@@ -138,10 +138,58 @@ public class MainActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         listItem.setLayoutManager(mLayoutManager);
 
-        loadData(); //Load data from FireStore
+        //FireStore Collection Listener
+        db.collection(groupCode)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w("ToDoList", "Listen failed.", e);
+                            return;
+                        }
+                        loadTasks();
+                        Log.w("ToDoList", "Listener Ran");
+                    }
+                });
     }
 
-    private void updateData(String title, String description) {
+
+
+    //
+    //
+    //Add Tasks
+    //
+    //
+
+    private void addTasks(String title, String description, String username) {
+        final String id = UUID.randomUUID().toString();
+        Map<String,Object> todo = new HashMap<>();
+        todo.put("id",id);
+        todo.put("title",title);
+        todo.put("description",description);
+        todo.put("username",username);
+
+        db.collection(groupCode).document(id)
+                .set(todo)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        //Refresh the data
+                        loadTasks();
+                        //loadData();
+                        idUpdate = id;
+                    }
+                });
+    }
+
+    //
+    //
+    //Update Tasks
+    //
+    //
+
+    private void updateTasks(String title, String description) {
         String author = mToDoList.get(globalUpdateIndex).getUsername();
         if(username.equals(author)){
             if(!((Activity) mContext).isFinishing())
@@ -163,7 +211,8 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
                             Log.e("Todo","Local Update");
-                            loadData();
+                            loadTasks();
+                            //loadData();
                         }
                     });
         }
@@ -173,88 +222,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setData(String title, String description, String username) {
-        final String id = UUID.randomUUID().toString();
-        Map<String,Object> todo = new HashMap<>();
-        todo.put("id",id);
-        todo.put("title",title);
-        todo.put("description",description);
-        todo.put("username",username);
+    //
+    //
+    //Delete Tasks
+    //
+    //
 
-        db.collection(groupCode).document(id)
-                .set(todo)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        //Refresh the data
-                        loadData();
-                        idUpdate = id;
-                    }
-                });
-    }
-
-    private void loadData(){
-        if(!((Activity) mContext).isFinishing())
-        {
-            mAlertDialog.show();
-        }
-        if(mToDoList.size()>0){
-            mToDoList.clear();
-        }
-        //Collection Listener
-        db.collection(groupCode)
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot snapshots,
-                                        @Nullable FirebaseFirestoreException e) {
-                        if (e != null) {
-                            System.err.println("Listen failed: " + e);
-                            return;
-                        }
-
-                        for (DocumentChange dc : snapshots.getDocumentChanges()) {
-                            switch (dc.getType()) {
-                                case ADDED:
-                                    if(!((Activity) mContext).isFinishing())
-                                    {
-                                        mAlertDialog.show();
-                                    }
-                                    String tempId = dc.getDocument().getData().get("id").toString();
-                                    String tempTitle = dc.getDocument().getData().get("title").toString();
-                                    String tempDesc = dc.getDocument().getData().get("description").toString();
-                                    String tempUser = dc.getDocument().getData().get("username").toString();
-                                    ToDo todo = new ToDo(tempId,tempTitle,tempDesc,tempUser);
-                                    mToDoList.add(todo);
-                                    mListItemAdapter = new ListItemAdapter(MainActivity.this, mToDoList);
-                                    listItem.setAdapter(mListItemAdapter);
-                                    mAlertDialog.dismiss();
-                                    break;
-                                case MODIFIED:
-                                    String tempUpdateTitle = dc.getDocument().getData().get("title").toString();
-                                    String tempUpdateDesc = dc.getDocument().getData().get("description").toString();
-                                    globalUpdateData(tempUpdateTitle,tempUpdateDesc);
-                                    break;
-                                case REMOVED:
-                                    globalDeleteTask(globalDeleteIndex);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    }
-                });
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        if(item.getTitle().equals("Delete Task")){
-            deleteTask(item.getOrder());
-            globalDeleteIndex = item.getOrder();
-        }
-        return super.onContextItemSelected(item);
-    }
-
-    private void deleteTask(final int index) {
+    private void deleteTasks(final int index) {
         String author = mToDoList.get(index).getUsername();
         if(username.equals(author)){
             db.collection(groupCode)
@@ -266,7 +240,8 @@ public class MainActivity extends AppCompatActivity {
                             if(mToDoList.size()>0){
                                 mToDoList.clear();
                             }
-                            loadData();
+                            loadTasks();
+                            //loadData();
                             globalDeleteIndex = index;
                             Toasty.info(MainActivity.this, "Deleted Task", Toast.LENGTH_SHORT, true).show();
                         }
@@ -278,47 +253,58 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void globalDeleteTask(int index){
-            db.collection(groupCode)
-                    .document(mToDoList.get(index).getId())
-                    .delete()
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            if(mToDoList.size()>0){
-                                mToDoList.clear();
+    //
+    //
+    //Load Tasks
+    //
+    //
+
+    public void loadTasks(){
+        if(!((Activity) mContext).isFinishing()) {
+            mAlertDialog.show();
+        }
+        if(mToDoList.size()>0){
+            mToDoList.clear();
+        }
+        db.collection(groupCode)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                ToDo todo = new ToDo(document.getString("id"),
+                                        document.getString("title"),
+                                        document.getString("description"),
+                                        document.getString("username"));
+                                mToDoList.add(todo);
+                                Log.d("ToDoList", document.getId() + " => " + document.getData());
                             }
-                            loadData();
-                            //Toasty.info(MainActivity.this, "Deleted Task", Toast.LENGTH_SHORT, true).show();
+                            mListItemAdapter = new ListItemAdapter(MainActivity.this,mToDoList);
+                            listItem.setAdapter(mListItemAdapter);
+                            mAlertDialog.dismiss();
+
+
+                        } else {
+                            Log.d("ToDoList", "Error getting documents: ", task.getException());
                         }
-                    });
+                    }
+                });
     }
 
-    private void globalUpdateData(String title, String description) {
-        String author = mToDoList.get(globalUpdateIndex).getUsername();
-        String globalUpdateId = mToDoList.get(globalUpdateIndex).getId();
-            if(!((Activity) mContext).isFinishing())
-            {
-                mAlertDialog.show();
-            }
-            db.collection(groupCode).document(globalUpdateId)
-                    .update("title",title,"description",description)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Toasty.info(MainActivity.this, "Updated Task", Toast.LENGTH_SHORT, true).show();
-                            //globalUpdateId = idUpdate;
-                        }
-                    });
+    //
+    //
+    //Override Methods
+    //
+    //
 
-            db.collection("ToDoList").document(globalUpdateId)
-                    .addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                        @Override
-                        public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
-                            Log.e("Todo","Global Update");
-                            loadData();
-                        }
-                    });
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        if(item.getTitle().equals("Delete Task")){
+            deleteTasks(item.getOrder());
+            globalDeleteIndex = item.getOrder();
+        }
+        return super.onContextItemSelected(item);
     }
 
     @Override
@@ -346,7 +332,4 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
-
-
 }
