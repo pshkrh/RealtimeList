@@ -1,5 +1,6 @@
 package com.pshkrh.realtimelist;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -43,7 +44,7 @@ public class SplashActivity extends AppCompatActivity {
                         if (user != null) {
                             //Signed in
                             onSignedInInit(user.getDisplayName());
-                            Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                            Intent intent = new Intent(SplashActivity.this, GroupCodeActivity.class);
                             intent.putExtra("Username", mUsername);
                             startActivity(intent);
                             finish();
@@ -83,7 +84,7 @@ public class SplashActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
                 Toasty.success(SplashActivity.this, "Signed in Successfully!", Toast.LENGTH_SHORT, true).show();
-                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                Intent intent = new Intent(SplashActivity.this, GroupCodeActivity.class);
                 intent.putExtra("Username", mUsername);
                 startActivity(intent);
                 finish();

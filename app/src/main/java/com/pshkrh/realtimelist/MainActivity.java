@@ -1,5 +1,7 @@
 package com.pshkrh.realtimelist;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     List<ToDo> mToDoList = new ArrayList<>();
     FirebaseFirestore db;
     FirebaseUser user;
+    public static final String ANONYMOUS = "Anonymous";
 
     RecyclerView listItem;
     RecyclerView.LayoutManager mLayoutManager;
@@ -69,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
     public String username;
     public String groupCode;
 
+    Context mContext = this;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +81,9 @@ public class MainActivity extends AppCompatActivity {
 
         //Get username and group code from SplashActivity's Intent
         username = getIntent().getStringExtra("Username");
+        if(username == null){
+            username = ANONYMOUS;
+        }
         groupCode = getIntent().getStringExtra("groupCode");
 
         //Initialize Firestore
@@ -110,7 +118,10 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 if(!isUpdate){
-                    mAlertDialog.show();
+                    if(!((Activity) mContext).isFinishing())
+                    {
+                        mAlertDialog.show();
+                    }
                     setData(title.getText().toString(),description.getText().toString(),username);
                     title.setText("");
                     description.setText("");
@@ -133,8 +144,11 @@ public class MainActivity extends AppCompatActivity {
     private void updateData(String title, String description) {
         String author = mToDoList.get(globalUpdateIndex).getUsername();
         if(username.equals(author)){
-            mAlertDialog.show();
-            db.collection("ToDoList").document(idUpdate)
+            if(!((Activity) mContext).isFinishing())
+            {
+                mAlertDialog.show();
+            }
+            db.collection(groupCode).document(idUpdate)
                     .update("title",title,"description",description)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
@@ -148,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
                     .addSnapshotListener(new EventListener<DocumentSnapshot>() {
                         @Override
                         public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                            Log.e("Todo","Local Update");
                             loadData();
                         }
                     });
@@ -166,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
         todo.put("description",description);
         todo.put("username",username);
 
-        db.collection("ToDoList").document(id)
+        db.collection(groupCode).document(id)
                 .set(todo)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -179,12 +194,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadData(){
-        mAlertDialog.show();
+        if(!((Activity) mContext).isFinishing())
+        {
+            mAlertDialog.show();
+        }
         if(mToDoList.size()>0){
             mToDoList.clear();
         }
         //Collection Listener
-        db.collection("ToDoList")
+        db.collection(groupCode)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot snapshots,
@@ -197,30 +215,32 @@ public class MainActivity extends AppCompatActivity {
                         for (DocumentChange dc : snapshots.getDocumentChanges()) {
                             switch (dc.getType()) {
                                 case ADDED:
-                                    mAlertDialog.show();
+                                    if(!((Activity) mContext).isFinishing())
+                                    {
+                                        mAlertDialog.show();
+                                    }
                                     String tempId = dc.getDocument().getData().get("id").toString();
                                     String tempTitle = dc.getDocument().getData().get("title").toString();
                                     String tempDesc = dc.getDocument().getData().get("description").toString();
                                     String tempUser = dc.getDocument().getData().get("username").toString();
                                     ToDo todo = new ToDo(tempId,tempTitle,tempDesc,tempUser);
                                     mToDoList.add(todo);
+                                    mListItemAdapter = new ListItemAdapter(MainActivity.this, mToDoList);
+                                    listItem.setAdapter(mListItemAdapter);
                                     mAlertDialog.dismiss();
                                     break;
                                 case MODIFIED:
                                     String tempUpdateTitle = dc.getDocument().getData().get("title").toString();
                                     String tempUpdateDesc = dc.getDocument().getData().get("description").toString();
-                                    updateData(tempUpdateTitle,tempUpdateDesc);
+                                    globalUpdateData(tempUpdateTitle,tempUpdateDesc);
                                     break;
                                 case REMOVED:
-                                    deleteTask(globalDeleteIndex);
+                                    globalDeleteTask(globalDeleteIndex);
                                     break;
                                 default:
                                     break;
                             }
                         }
-                        mListItemAdapter = new ListItemAdapter(MainActivity.this, mToDoList);
-                        listItem.setAdapter(mListItemAdapter);
-                        mAlertDialog.dismiss();
                     }
                 });
     }
@@ -229,6 +249,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onContextItemSelected(MenuItem item) {
         if(item.getTitle().equals("Delete Task")){
             deleteTask(item.getOrder());
+            globalDeleteIndex = item.getOrder();
         }
         return super.onContextItemSelected(item);
     }
@@ -236,12 +257,15 @@ public class MainActivity extends AppCompatActivity {
     private void deleteTask(final int index) {
         String author = mToDoList.get(index).getUsername();
         if(username.equals(author)){
-            db.collection("ToDoList")
+            db.collection(groupCode)
                     .document(mToDoList.get(index).getId())
                     .delete()
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
+                            if(mToDoList.size()>0){
+                                mToDoList.clear();
+                            }
                             loadData();
                             globalDeleteIndex = index;
                             Toasty.info(MainActivity.this, "Deleted Task", Toast.LENGTH_SHORT, true).show();
@@ -254,10 +278,53 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void globalDeleteTask(int index){
+            db.collection(groupCode)
+                    .document(mToDoList.get(index).getId())
+                    .delete()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            if(mToDoList.size()>0){
+                                mToDoList.clear();
+                            }
+                            loadData();
+                            //Toasty.info(MainActivity.this, "Deleted Task", Toast.LENGTH_SHORT, true).show();
+                        }
+                    });
+    }
+
+    private void globalUpdateData(String title, String description) {
+        String author = mToDoList.get(globalUpdateIndex).getUsername();
+        String globalUpdateId = mToDoList.get(globalUpdateIndex).getId();
+            if(!((Activity) mContext).isFinishing())
+            {
+                mAlertDialog.show();
+            }
+            db.collection(groupCode).document(globalUpdateId)
+                    .update("title",title,"description",description)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toasty.info(MainActivity.this, "Updated Task", Toast.LENGTH_SHORT, true).show();
+                            //globalUpdateId = idUpdate;
+                        }
+                    });
+
+            db.collection("ToDoList").document(globalUpdateId)
+                    .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                        @Override
+                        public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                            Log.e("Todo","Global Update");
+                            loadData();
+                        }
+                    });
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu,menu);
+        inflater.inflate(R.menu.second_menu,menu);
         return true;
     }
 
@@ -270,6 +337,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
                 return true;
+            case R.id.change_group_menu:
+                intent = new Intent(MainActivity.this,GroupCodeActivity.class);
+                intent.putExtra("Username",username);
+                startActivity(intent);
+                finish();
             default:
                 return super.onOptionsItemSelected(item);
         }
