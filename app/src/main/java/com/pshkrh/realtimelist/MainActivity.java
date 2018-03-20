@@ -67,14 +67,16 @@ public class MainActivity extends AppCompatActivity {
     SpotsDialog mAlertDialog;
 
     public String username;
+    public String groupCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Get username from SplashActivity's Intent
+        //Get username and group code from SplashActivity's Intent
         username = getIntent().getStringExtra("Username");
+        groupCode = getIntent().getStringExtra("groupCode");
 
         //Initialize Firestore
         db = FirebaseFirestore.getInstance();

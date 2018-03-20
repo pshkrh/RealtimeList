@@ -5,4 +5,9 @@
     <string name="splash">Realtime To-Do List</string>
     <string name="posted_by">Posted By:&#160;</string>
     <string name="sign_out">Sign Out</string>
+    <string name="group_code">Enter Group Code</string>
+    <string name="submit">Submit</string>
+    <string name="change_group">Change Group</string>
+    <string name="case_sensitive">Note: The group code is case-sensitive.</string>
+    <string name="select_option">Welcome to To-Do List. Please enter the Group Code to proceed. &#xD;If there is no group with that code, it will be created.</string>
 </resources>
