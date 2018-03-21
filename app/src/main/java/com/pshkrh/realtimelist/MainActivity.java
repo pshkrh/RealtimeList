@@ -31,8 +31,10 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.pshkrh.realtimelist.Adapter.ListItemAdapter;
 import com.pshkrh.realtimelist.Model.ToDo;
@@ -138,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         listItem.setLayoutManager(mLayoutManager);
 
-        //FireStore Collection Listener
+        //Firestore Collection Listener
         db.collection(groupCode)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
@@ -149,11 +151,10 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
                         loadTasks();
-                        Log.w("ToDoList", "Listener Ran");
+                        Log.d("ToDoList", "Listener Ran");
                     }
                 });
     }
-
 
 
     //
@@ -169,16 +170,17 @@ public class MainActivity extends AppCompatActivity {
         todo.put("title",title);
         todo.put("description",description);
         todo.put("username",username);
-
+        todo.put("date", FieldValue.serverTimestamp());
         db.collection(groupCode).document(id)
                 .set(todo)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         //Refresh the data
-                        loadTasks();
+                        Log.d("ToDoList","Added Task");
+                        //loadTasks();
                         //loadData();
-                        idUpdate = id;
+                        //idUpdate = id;
                     }
                 });
     }
@@ -206,12 +208,12 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
-            db.collection("ToDoList").document(idUpdate)
+            db.collection(groupCode).document(idUpdate)
                     .addSnapshotListener(new EventListener<DocumentSnapshot>() {
                         @Override
                         public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
                             Log.e("Todo","Local Update");
-                            loadTasks();
+                            //loadTasks();
                             //loadData();
                         }
                     });
@@ -237,12 +239,13 @@ public class MainActivity extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            if(mToDoList.size()>0){
+                            /*if(mToDoList.size()>0){
                                 mToDoList.clear();
-                            }
-                            loadTasks();
+                            }*/
+                            //loadTasks();
                             //loadData();
-                            globalDeleteIndex = index;
+                            //globalDeleteIndex = index;
+                            mListItemAdapter.notifyDataSetChanged();
                             Toasty.info(MainActivity.this, "Deleted Task", Toast.LENGTH_SHORT, true).show();
                         }
                     });
@@ -267,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
             mToDoList.clear();
         }
         db.collection(groupCode)
+                .orderBy("date", Query.Direction.DESCENDING)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -278,12 +282,12 @@ public class MainActivity extends AppCompatActivity {
                                         document.getString("description"),
                                         document.getString("username"));
                                 mToDoList.add(todo);
-                                Log.d("ToDoList", document.getId() + " => " + document.getData());
+                                //Log.d("ToDoList", document.getId() + " => " + document.getData());
                             }
                             mListItemAdapter = new ListItemAdapter(MainActivity.this,mToDoList);
                             listItem.setAdapter(mListItemAdapter);
                             mAlertDialog.dismiss();
-
+                            Log.d("ToDoList","LoadTask ran");
 
                         } else {
                             Log.d("ToDoList", "Error getting documents: ", task.getException());
@@ -302,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onContextItemSelected(MenuItem item) {
         if(item.getTitle().equals("Delete Task")){
             deleteTasks(item.getOrder());
-            globalDeleteIndex = item.getOrder();
+            //globalDeleteIndex = item.getOrder();
         }
         return super.onContextItemSelected(item);
     }
