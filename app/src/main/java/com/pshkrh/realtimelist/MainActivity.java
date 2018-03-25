@@ -181,6 +181,13 @@ public class MainActivity extends AppCompatActivity {
                         //loadTasks();
                         //loadData();
                         //idUpdate = id;
+                        mListItemAdapter.notifyDataSetChanged();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("ToDoList","Add Task Failed");
                     }
                 });
     }
@@ -205,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onSuccess(Void aVoid) {
                             Toasty.info(MainActivity.this, "Updated Task", Toast.LENGTH_SHORT, true).show();
                             //globalUpdateId = idUpdate;
+                            mListItemAdapter.notifyDataSetChanged();
                         }
                     });
 
