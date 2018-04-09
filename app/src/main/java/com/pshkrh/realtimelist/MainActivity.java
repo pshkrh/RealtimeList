@@ -144,7 +144,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        
+        attach = findViewById(R.id.attach);
+        attach.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CharSequence colors[] = new CharSequence[] {"Image", "PDF"};
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                builder.setTitle("Attach a document");
+                builder.setItems(colors, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // TODO: Attachment intents
+                    }
+                });
+                builder.show();
+            }
+        });
 
         listItem = (RecyclerView)findViewById(R.id.recycler);
         listItem.setHasFixedSize(true);

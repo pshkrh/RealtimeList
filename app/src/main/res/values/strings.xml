@@ -9,5 +9,6 @@
     <string name="submit">Submit</string>
     <string name="change_group">Change Group</string>
     <string name="case_sensitive">Note: The group code is case-sensitive.</string>
+    <string name="attach">Attach a document (optional)</string>
     <string name="select_option">Welcome to To-Do List. Please enter the Group Code to proceed. &#xD;If there is no group with that code, it will be created.</string>
 </resources>
