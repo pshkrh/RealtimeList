@@ -78,7 +78,7 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
                 mainActivity.title.setText(todoList.get(position).getTitle());
                 mainActivity.description.setText(todoList.get(position).getDescription());
 
-                mainActivity.isUpdate = true;
+                    mainActivity.isUpdate = true;
                 mainActivity.idUpdate = todoList.get(position).getId();
                 mainActivity.globalUpdateIndex = todoList.get(position).getPosition(position);
 

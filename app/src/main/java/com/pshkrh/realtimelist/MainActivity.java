@@ -2,6 +2,7 @@ package com.pshkrh.realtimelist;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -36,6 +38,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
 import com.pshkrh.realtimelist.Adapter.ListItemAdapter;
 import com.pshkrh.realtimelist.Model.ToDo;
 import com.rengwuxian.materialedittext.MaterialEditText;
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     List<ToDo> mToDoList = new ArrayList<>();
     FirebaseFirestore db;
     FirebaseUser user;
+    private FirebaseStorage mFirebaseStorage;
     public static final String ANONYMOUS = "Anonymous";
 
     RecyclerView listItem;
@@ -76,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
     Context mContext = this;
 
+    ImageButton attach;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +96,9 @@ public class MainActivity extends AppCompatActivity {
 
         //Initialize Firestore
         db = FirebaseFirestore.getInstance();
+
+        //Initialize Firebase Storage
+        mFirebaseStorage = FirebaseStorage.getInstance();
 
         //Initialize all views
         mAlertDialog = new SpotsDialog(this);
@@ -135,6 +144,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        
+
         listItem = (RecyclerView)findViewById(R.id.recycler);
         listItem.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
@@ -150,8 +161,8 @@ public class MainActivity extends AppCompatActivity {
                             Log.w("ToDoList", "Listen failed.", e);
                             return;
                         }
-                        loadTasks();
                         Log.d("ToDoList", "Listener Ran");
+                        loadTasks();
                     }
                 });
     }
@@ -216,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
-            db.collection(groupCode).document(idUpdate)
+            /*db.collection(groupCode).document(idUpdate)
                     .addSnapshotListener(new EventListener<DocumentSnapshot>() {
                         @Override
                         public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
@@ -224,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
                             //loadTasks();
                             //loadData();
                         }
-                    });
+                    });*/
         }
         else{
             Toasty.error(MainActivity.this,"You cannot edit someone else's task", Toast.LENGTH_LONG, true).show();
@@ -276,6 +287,8 @@ public class MainActivity extends AppCompatActivity {
         }
         if(mToDoList.size()>0){
             mToDoList.clear();
+            mListItemAdapter.notifyDataSetChanged();
+            Log.i("ToDoList", "List cleared");
         }
         db.collection(groupCode)
                 .orderBy("date", Query.Direction.DESCENDING)
@@ -289,6 +302,7 @@ public class MainActivity extends AppCompatActivity {
                                         document.getString("title"),
                                         document.getString("description"),
                                         document.getString("username"));
+                                Log.i("ToDoList", "Adding item to list");
                                 mToDoList.add(todo);
                                 //Log.d("ToDoList", document.getId() + " => " + document.getData());
                             }
