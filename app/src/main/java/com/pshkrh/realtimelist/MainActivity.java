@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -39,6 +40,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.pshkrh.realtimelist.Adapter.ListItemAdapter;
 import com.pshkrh.realtimelist.Model.ToDo;
 import com.rengwuxian.materialedittext.MaterialEditText;
@@ -57,8 +60,15 @@ public class MainActivity extends AppCompatActivity {
     List<ToDo> mToDoList = new ArrayList<>();
     FirebaseFirestore db;
     FirebaseUser user;
+
     private FirebaseStorage mFirebaseStorage;
+    private StorageReference mDocsStorageReference;
+
     public static final String ANONYMOUS = "Anonymous";
+
+    private static final int RC_SIGN_IN = 1;
+    private static final int RC_PHOTO_PICKER =  2;
+    private static final int RC_PDF_PICKER = 3;
 
     RecyclerView listItem;
     RecyclerView.LayoutManager mLayoutManager;
@@ -82,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
 
     ImageButton attach;
 
+    Uri imageUri;
+    Uri pdfUri;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Initialize Firebase Storage
         mFirebaseStorage = FirebaseStorage.getInstance();
+        mDocsStorageReference = mFirebaseStorage.getReference().child("docs");
 
         //Initialize all views
         mAlertDialog = new SpotsDialog(this);
@@ -148,14 +162,27 @@ public class MainActivity extends AppCompatActivity {
         attach.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CharSequence colors[] = new CharSequence[] {"Image", "PDF"};
+                final CharSequence docs[] = new CharSequence[] {"Image", "PDF"};
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                 builder.setTitle("Attach a document");
-                builder.setItems(colors, new DialogInterface.OnClickListener() {
+                builder.setItems(docs, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // TODO: Attachment intents
+                        if(docs[which] == "Image"){
+                            // TODO: Image Attachment intents
+                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                            intent.setType("image/jpeg");
+                            intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                            startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
+                        }
+                        else{
+                            // TODO: PDF Attachment intents
+                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                            intent.setType("application/pdf");
+                            intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                            startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PDF_PICKER);
+                        }
                     }
                 });
                 builder.show();
@@ -205,9 +232,6 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(Void aVoid) {
                         //Refresh the data
                         Log.d("ToDoList","Added Task");
-                        //loadTasks();
-                        //loadData();
-                        //idUpdate = id;
                         mListItemAdapter.notifyDataSetChanged();
                     }
                 })
@@ -274,12 +298,6 @@ public class MainActivity extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            /*if(mToDoList.size()>0){
-                                mToDoList.clear();
-                            }*/
-                            //loadTasks();
-                            //loadData();
-                            //globalDeleteIndex = index;
                             mListItemAdapter.notifyDataSetChanged();
                             Toasty.info(MainActivity.this, "Deleted Task", Toast.LENGTH_SHORT, true).show();
                         }
@@ -344,7 +362,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onContextItemSelected(MenuItem item) {
         if(item.getTitle().equals("Delete Task")){
             deleteTasks(item.getOrder());
-            //globalDeleteIndex = item.getOrder();
         }
         return super.onContextItemSelected(item);
     }
@@ -372,6 +389,35 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == RC_PHOTO_PICKER) {
+            Uri selectedImageUri = data.getData();
+            StorageReference photoRef = mDocsStorageReference.child(selectedImageUri.getLastPathSegment());
+
+            photoRef.putFile(selectedImageUri).addOnSuccessListener
+                    (this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            imageUri = taskSnapshot.getDownloadUrl();
+                        }
+                    });
+        }
+        else if(requestCode == RC_PDF_PICKER){
+            Uri selectedPdfUri = data.getData();
+            StorageReference photoRef = mDocsStorageReference.child(selectedPdfUri.getLastPathSegment());
+
+            photoRef.putFile(selectedPdfUri).addOnSuccessListener
+                    (this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            pdfUri = taskSnapshot.getDownloadUrl();
+                        }
+                    });
         }
     }
 }
