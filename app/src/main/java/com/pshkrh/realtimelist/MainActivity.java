@@ -21,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView.LayoutManager mLayoutManager;
 
     FloatingActionButton fab;
+    ProgressBar mProgressBar;
 
     public MaterialEditText title, description;
     public boolean isUpdate = false;
@@ -99,6 +101,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mProgressBar = (ProgressBar)findViewById(R.id.progress_bar);
+
+        mProgressBar.setVisibility(View.INVISIBLE);
 
         //Get username and group code from SplashActivity's Intent
         username = getIntent().getStringExtra("Username");
@@ -396,6 +402,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == RC_PHOTO_PICKER) {
+            mProgressBar.setVisibility(View.VISIBLE);
             Uri selectedImageUri = data.getData();
             StorageReference photoRef = mDocsStorageReference.child(selectedImageUri.getLastPathSegment());
 
@@ -403,11 +410,13 @@ public class MainActivity extends AppCompatActivity {
                     (this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            mProgressBar.setVisibility(View.GONE);
                             imageUri = taskSnapshot.getDownloadUrl();
                         }
                     });
         }
         else if(requestCode == RC_PDF_PICKER){
+            mProgressBar.setVisibility(View.VISIBLE);
             Uri selectedPdfUri = data.getData();
             StorageReference photoRef = mDocsStorageReference.child(selectedPdfUri.getLastPathSegment());
 
@@ -415,6 +424,7 @@ public class MainActivity extends AppCompatActivity {
                     (this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            mProgressBar.setVisibility(View.GONE);
                             pdfUri = taskSnapshot.getDownloadUrl();
                         }
                     });
