@@ -53,7 +53,16 @@
                 android:textSize="12sp"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
-                android:fontFamily="sans-serif-condensed" />
+                android:fontFamily="sans-serif-condensed"
+                android:layout_weight="0.9"/>
+
+            <ImageButton
+                android:id="@+id/attach_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_paperclip_grey600_24dp"
+                android:background="@color/white"
+                android:layout_weight="0.1" />
 
         </LinearLayout>
 

@@ -9,7 +9,7 @@ import java.util.Date;
  */
 
 public class ToDo {
-    public String id,title,description,username;
+    public String id,title,description,username,file;
 
     @ServerTimestamp
     private Date date;
@@ -17,11 +17,12 @@ public class ToDo {
     public ToDo() {
     }
 
-    public ToDo(String id, String title, String description, String username) {
+    public ToDo(String id, String title, String description, String username, String file) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.username = username;
+        this.file = file;
     }
 
     public String getId() {
@@ -50,5 +51,13 @@ public class ToDo {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
     }
 }

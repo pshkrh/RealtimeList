@@ -5,6 +5,7 @@ import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.pshkrh.realtimelist.MainActivity;
@@ -21,6 +22,8 @@ class ListItemViewHolder extends RecyclerView.ViewHolder implements View.OnClick
 
     ItemClickListener mItemClickListener;
     TextView itemTitle, itemDescription,itemUsername;
+    ImageButton attach;
+    String fileName;
 
     public ListItemViewHolder(View itemView) {
         super(itemView);
@@ -30,6 +33,8 @@ class ListItemViewHolder extends RecyclerView.ViewHolder implements View.OnClick
         itemTitle = (TextView)itemView.findViewById(R.id.item_title);
         itemDescription = (TextView)itemView.findViewById(R.id.item_description);
         itemUsername = (TextView)itemView.findViewById(R.id.item_username);
+        attach = (ImageButton)itemView.findViewById(R.id.attach_icon);
+
     }
 
     public void setItemClickListener(ItemClickListener itemClickListener) {
@@ -70,6 +75,11 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
         holder.itemTitle.setText(todoList.get(position).getTitle());
         holder.itemDescription.setText(todoList.get(position).getDescription());
         holder.itemUsername.setText(todoList.get(position).getUsername());
+
+        String file = holder.fileName = todoList.get(position).getFile();
+        if(file.equals("NONE")){
+            holder.attach.setVisibility(View.INVISIBLE);
+        }
 
         holder.setItemClickListener(new ItemClickListener() {
             @Override

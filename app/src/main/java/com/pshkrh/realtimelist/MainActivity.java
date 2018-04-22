@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -46,6 +47,8 @@ import com.google.firebase.storage.UploadTask;
 import com.pshkrh.realtimelist.Adapter.ListItemAdapter;
 import com.pshkrh.realtimelist.Model.ToDo;
 import com.rengwuxian.materialedittext.MaterialEditText;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,12 +100,20 @@ public class MainActivity extends AppCompatActivity {
     Uri imageUri;
     Uri pdfUri;
 
+    String imgName;
+    String pdfName;
+
+    TextView attachedFile;
+
+    String finalAttachmentName="NONE";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         mProgressBar = (ProgressBar)findViewById(R.id.progress_bar);
+        attachedFile = (TextView)findViewById(R.id.attached_filename);
 
         mProgressBar.setVisibility(View.INVISIBLE);
 
@@ -156,6 +167,9 @@ public class MainActivity extends AppCompatActivity {
                     addTasks(title.getText().toString(),description.getText().toString(),username);
                     title.setText("");
                     description.setText("");
+                    attachedFile.setText(getString(R.string.attach));
+                    pdfName="";
+                    imgName="";
                 }
                 else{
                     updateTasks(title.getText().toString(),description.getText().toString());
@@ -176,14 +190,12 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if(docs[which] == "Image"){
-                            // TODO: Image Attachment intents
                             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                             intent.setType("image/jpeg");
                             intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
                             startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
                         }
                         else{
-                            // TODO: PDF Attachment intents
                             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                             intent.setType("application/pdf");
                             intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
@@ -231,6 +243,7 @@ public class MainActivity extends AppCompatActivity {
         todo.put("description",description);
         todo.put("username",username);
         todo.put("date", FieldValue.serverTimestamp());
+        todo.put("file",finalAttachmentName);
         db.collection(groupCode).document(id)
                 .set(todo)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -341,7 +354,9 @@ public class MainActivity extends AppCompatActivity {
                                 ToDo todo = new ToDo(document.getString("id"),
                                         document.getString("title"),
                                         document.getString("description"),
-                                        document.getString("username"));
+                                        document.getString("username"),
+                                        document.getString("file"));
+
                                 Log.i("ToDoList", "Adding item to list");
                                 mToDoList.add(todo);
                                 //Log.d("ToDoList", document.getId() + " => " + document.getData());
@@ -403,7 +418,8 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == RC_PHOTO_PICKER) {
             mProgressBar.setVisibility(View.VISIBLE);
-            Uri selectedImageUri = data.getData();
+            fab.setEnabled(false);
+            final Uri selectedImageUri = data.getData();
             StorageReference photoRef = mDocsStorageReference.child(selectedImageUri.getLastPathSegment());
 
             photoRef.putFile(selectedImageUri).addOnSuccessListener
@@ -411,13 +427,18 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             mProgressBar.setVisibility(View.GONE);
+                            fab.setEnabled(true);
                             imageUri = taskSnapshot.getDownloadUrl();
+                            imgName = selectedImageUri.getLastPathSegment();
+                            finalAttachmentName = imgName;
+                            attachedFile.setText(imgName);
                         }
                     });
         }
         else if(requestCode == RC_PDF_PICKER){
             mProgressBar.setVisibility(View.VISIBLE);
-            Uri selectedPdfUri = data.getData();
+            fab.setEnabled(false);
+            final Uri selectedPdfUri = data.getData();
             StorageReference photoRef = mDocsStorageReference.child(selectedPdfUri.getLastPathSegment());
 
             photoRef.putFile(selectedPdfUri).addOnSuccessListener
@@ -425,7 +446,11 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             mProgressBar.setVisibility(View.GONE);
+                            fab.setEnabled(true);
                             pdfUri = taskSnapshot.getDownloadUrl();
+                            pdfName = selectedPdfUri.getLastPathSegment();
+                            finalAttachmentName = pdfName;
+                            attachedFile.setText(pdfName);
                         }
                     });
         }
