@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -107,10 +109,21 @@ public class MainActivity extends AppCompatActivity {
 
     String finalAttachmentName="NONE";
 
+    public DrawerLayout mDrawerLayout;
+    public ActionBarDrawerToggle mActionBarDrawerToggle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+        mActionBarDrawerToggle = new ActionBarDrawerToggle(this,mDrawerLayout,R.string.open,R.string.close);
+
+        mDrawerLayout.addDrawerListener(mActionBarDrawerToggle);
+        mActionBarDrawerToggle.syncState();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mProgressBar = (ProgressBar)findViewById(R.id.progress_bar);
         attachedFile = (TextView)findViewById(R.id.attached_filename);
@@ -379,6 +392,8 @@ public class MainActivity extends AppCompatActivity {
     //
     //
 
+
+
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         if(item.getTitle().equals("Delete Task")){
@@ -396,6 +411,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+        if(mActionBarDrawerToggle.onOptionsItemSelected(item)){
+            return true;
+        }
+
         switch(item.getItemId()){
             case R.id.sign_out_menu:
                 AuthUI.getInstance().signOut(this);
