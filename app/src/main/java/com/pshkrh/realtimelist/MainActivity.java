@@ -492,7 +492,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
 
             case R.id.nav_chat:
-                Toast.makeText(mContext, "Group chat coming soon", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this,ChatActivity.class);
+                intent.putExtra("Group Code",groupCode);
+                startActivity(intent);
                 break;
 
             case R.id.nav_about:
