@@ -2,7 +2,7 @@
     <string name="app_name">To-Do List</string>
     <string name="task_title">Title</string>
     <string name="task_description">Description</string>
-    <string name="splash">Realtime To-Do List</string>
+    <string name="splash">To-Do List</string>
     <string name="posted_by">Posted By:&#160;</string>
     <string name="sign_out">Sign Out</string>
     <string name="group_code">Enter Group Code</string>
@@ -21,4 +21,7 @@
     <string name="help">Help</string>
     <string name="about">About</string>
     <string name="contact">Contact</string>
+    <string name="communicate">Communicate</string>
+    <string name="placeholder">Placeholder Text</string>
+    <string name="chat_name">Placeholder Name</string>
 </resources>

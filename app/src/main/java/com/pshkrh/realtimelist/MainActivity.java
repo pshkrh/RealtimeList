@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -61,7 +62,7 @@ import java.util.UUID;
 import dmax.dialog.SpotsDialog;
 import es.dmoral.toasty.Toasty;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     List<ToDo> mToDoList = new ArrayList<>();
     FirebaseFirestore db;
@@ -124,6 +125,9 @@ public class MainActivity extends AppCompatActivity {
         mActionBarDrawerToggle.syncState();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        NavigationView navigationView = (NavigationView)findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
         mProgressBar = (ProgressBar)findViewById(R.id.progress_bar);
         attachedFile = (TextView)findViewById(R.id.attached_filename);
@@ -409,6 +413,8 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -474,5 +480,36 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
         }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        switch(id){
+            case R.id.nav_todo:
+                Toast.makeText(mContext, "You are here!", Toast.LENGTH_SHORT).show();
+                break;
+
+            case R.id.nav_chat:
+                Toast.makeText(mContext, "Group chat coming soon", Toast.LENGTH_SHORT).show();
+                break;
+
+            case R.id.nav_about:
+                Toast.makeText(mContext, "Made by Pushkar Kurhekar", Toast.LENGTH_SHORT).show();
+                break;
+
+            case R.id.nav_contact:
+                Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+                emailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                emailIntent.setType("vnd.android.cursor.item/email");
+                emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[] {"dev@pshkrh.com"});
+                emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Feedback / Query regarding To-Do List");
+                emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "");
+                startActivity(Intent.createChooser(emailIntent, "Send mail using..."));
+                break;
+        }
+
+        return false;
     }
 }
