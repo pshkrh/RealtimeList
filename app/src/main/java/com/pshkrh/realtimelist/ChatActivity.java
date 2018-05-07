@@ -23,6 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -221,6 +222,20 @@ public class ChatActivity extends AppCompatActivity implements NavigationView.On
                 emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Feedback / Query regarding To-Do List");
                 emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "");
                 startActivity(Intent.createChooser(emailIntent, "Send mail using..."));
+                break;
+
+            case R.id.nav_change_group:
+                intent = new Intent(ChatActivity.this,GroupCodeActivity.class);
+                intent.putExtra("Username",mUsername);
+                startActivity(intent);
+                finish();
+                break;
+
+            case R.id.nav_signout:
+                AuthUI.getInstance().signOut(this);
+                intent = new Intent(ChatActivity.this, SplashActivity.class);
+                startActivity(intent);
+                finish();
                 break;
         }
 

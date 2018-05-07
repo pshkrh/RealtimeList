@@ -23,7 +23,8 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="scalingPercent" value="60" />
+                                                <entry key="scalingPercent" value="80" />
+                                                <entry key="trimmed" value="true" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -47,7 +48,7 @@
                                     <map>
                                       <entry key="backgroundAssetType" value="COLOR" />
                                       <entry key="backgroundColor" value="00bcd4" />
-                                      <entry key="foregroundImage" value="C:\Users\pshkr\Desktop\format-list-checks (1).png" />
+                                      <entry key="foregroundImage" value="C:\Users\pshkr\Desktop\todo transparent.png" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -80,6 +81,29 @@
                                 </PersistentState>
                               </value>
                             </entry>
+                          </map>
+                        </option>
+                      </PersistentState>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </PersistentState>
+          </value>
+        </entry>
+        <entry key="vectorWizard">
+          <value>
+            <PersistentState>
+              <option name="children">
+                <map>
+                  <entry key="vectorAssetStep">
+                    <value>
+                      <PersistentState>
+                        <option name="values">
+                          <map>
+                            <entry key="assetSourceType" value="FILE" />
+                            <entry key="outputName" value="ic_todo_transparent" />
+                            <entry key="sourceFile" value="C:\Users\pshkr\Downloads\todo transparent.svg" />
                           </map>
                         </option>
                       </PersistentState>

@@ -14,6 +14,16 @@
                     android:id="@+id/nav_chat"
                     android:icon="@drawable/ic_message_text_black_24dp"
                     android:title="@string/nav_chat" />
+
+                <item
+                    android:id="@+id/nav_change_group"
+                    android:icon="@drawable/ic_swap_horizontal_black_24dp"
+                    android:title="@string/change_group"/>
+
+                <item
+                    android:id="@+id/nav_signout"
+                    android:icon="@drawable/ic_logout_black_24dp"
+                    android:title="@string/sign_out"/>
             </group>
         </menu>
     </item>

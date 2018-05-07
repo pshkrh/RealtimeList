@@ -26,4 +26,5 @@
     <string name="chat_name">Placeholder Name</string>
     <string name="group_chat">\'s Group Chat</string>
     <string name="enter_msg">Enter a message</string>
+    <string name="under_text">The Realtime To-Do List and Chat App</string>
 </resources>

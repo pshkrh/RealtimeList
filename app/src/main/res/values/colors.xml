@@ -6,4 +6,5 @@
     <color name="white">#ffffff</color>
     <color name="chat_color">#eceff1</color>
     <color name="group_color">#bdbdbd</color>
+    <color name="splash">#2adfff</color>
 </resources>

@@ -408,13 +408,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onContextItemSelected(item);
     }
 
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.second_menu,menu);
         return true;
     }
-
+    */
 
 
     @Override
@@ -424,7 +424,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return true;
         }
 
-        switch(item.getItemId()){
+        /*switch(item.getItemId()){
             case R.id.sign_out_menu:
                 AuthUI.getInstance().signOut(this);
                 Intent intent = new Intent(MainActivity.this, SplashActivity.class);
@@ -438,7 +438,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 finish();
             default:
                 return super.onOptionsItemSelected(item);
-        }
+        }*/
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -518,6 +519,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Feedback / Query regarding To-Do List");
                 emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "");
                 startActivity(Intent.createChooser(emailIntent, "Send mail using..."));
+                break;
+
+            case R.id.nav_change_group:
+                intent = new Intent(MainActivity.this,GroupCodeActivity.class);
+                intent.putExtra("Username",username);
+                startActivity(intent);
+                finish();
+                break;
+
+            case R.id.nav_signout:
+                AuthUI.getInstance().signOut(this);
+                intent = new Intent(MainActivity.this, SplashActivity.class);
+                startActivity(intent);
+                finish();
                 break;
         }
 
