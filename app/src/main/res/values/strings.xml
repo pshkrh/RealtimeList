@@ -15,7 +15,7 @@
     <string name="nav_chat">Group Chat</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
-    <string name="dev">Developer: Pushkar Kurhekar</string>
+    <string name="ver">Version 0.1 Beta</string>
     <string name="site">pshkrh.com</string>
     <string name="select">Select an Option</string>
     <string name="help">Help</string>
@@ -25,4 +25,5 @@
     <string name="placeholder">Placeholder Text</string>
     <string name="chat_name">Placeholder Name</string>
     <string name="group_chat">\'s Group Chat</string>
+    <string name="enter_msg">Enter a message</string>
 </resources>

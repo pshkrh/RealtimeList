@@ -129,6 +129,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView)findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        navigationView.setCheckedItem(R.id.nav_todo);
+
         mProgressBar = (ProgressBar)findViewById(R.id.progress_bar);
         attachedFile = (TextView)findViewById(R.id.attached_filename);
 
@@ -484,6 +486,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // set item as selected to persist highlight
+        item.setChecked(true);
+        // close drawer when item is tapped
+        mDrawerLayout.closeDrawers();
+        item.setChecked(false);
+
         int id = item.getItemId();
 
         switch(id){
@@ -494,6 +502,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_chat:
                 Intent intent = new Intent(MainActivity.this,ChatActivity.class);
                 intent.putExtra("Group Code",groupCode);
+                intent.putExtra("Username",username);
                 startActivity(intent);
                 break;
 
@@ -513,5 +522,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         return false;
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(MainActivity.this,GroupCodeActivity.class);
+        startActivity(intent);
     }
 }

@@ -20,15 +20,18 @@
 
     <item android:title="@string/communicate">
         <menu>
-            <item
-                android:id="@+id/nav_about"
-                android:icon="@drawable/ic_information_grey600_48dp"
-                android:title="@string/about" />
+            <group
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_about"
+                    android:icon="@drawable/ic_information_grey600_48dp"
+                    android:title="@string/about" />
 
-            <item
-                android:id="@+id/nav_contact"
-                android:icon="@drawable/ic_email_black_24dp"
-                android:title="@string/contact" />
+                <item
+                    android:id="@+id/nav_contact"
+                    android:icon="@drawable/ic_email_black_24dp"
+                    android:title="@string/contact" />
+            </group>
         </menu>
     </item>
 
