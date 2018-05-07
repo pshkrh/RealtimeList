@@ -100,6 +100,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     ImageButton attach;
 
+    ImageButton paperclip;
+
     Uri imageUri;
     Uri pdfUri;
 
@@ -201,28 +203,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         attach.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final CharSequence docs[] = new CharSequence[] {"Image", "PDF"};
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/jpeg");
+                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
+            }
+        });
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                builder.setTitle("Attach a document");
-                builder.setItems(docs, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if(docs[which] == "Image"){
-                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                            intent.setType("image/jpeg");
-                            intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-                            startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
-                        }
-                        else{
-                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                            intent.setType("application/pdf");
-                            intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-                            startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PDF_PICKER);
-                        }
-                    }
-                });
-                builder.show();
+        attachedFile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/jpeg");
+                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
             }
         });
 
@@ -408,15 +402,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onContextItemSelected(item);
     }
 
-    /*@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.second_menu,menu);
-        return true;
-    }
-    */
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -424,30 +409,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return true;
         }
 
-        /*switch(item.getItemId()){
-            case R.id.sign_out_menu:
-                AuthUI.getInstance().signOut(this);
-                Intent intent = new Intent(MainActivity.this, SplashActivity.class);
-                startActivity(intent);
-                finish();
-                return true;
-            case R.id.change_group_menu:
-                intent = new Intent(MainActivity.this,GroupCodeActivity.class);
-                intent.putExtra("Username",username);
-                startActivity(intent);
-                finish();
-            default:
-                return super.onOptionsItemSelected(item);
-        }*/
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RC_PHOTO_PICKER) {
+        if(requestCode == RC_PHOTO_PICKER && resultCode == Activity.RESULT_OK) {
             mProgressBar.setVisibility(View.VISIBLE);
-            fab.setEnabled(false);
+            fab.setVisibility(View.INVISIBLE);
             final Uri selectedImageUri = data.getData();
             StorageReference photoRef = mDocsStorageReference.child(selectedImageUri.getLastPathSegment());
 
@@ -464,7 +434,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                     });
         }
-        else if(requestCode == RC_PDF_PICKER){
+        /*else if(requestCode == RC_PDF_PICKER){
             mProgressBar.setVisibility(View.VISIBLE);
             fab.setEnabled(false);
             final Uri selectedPdfUri = data.getData();
@@ -482,7 +452,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             attachedFile.setText(pdfName);
                         }
                     });
-        }
+        }*/
     }
 
     @Override

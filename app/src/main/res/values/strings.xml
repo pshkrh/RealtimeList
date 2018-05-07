@@ -9,13 +9,13 @@
     <string name="submit">Submit</string>
     <string name="change_group">Change Group</string>
     <string name="case_sensitive">Note: The group code is case-sensitive.</string>
-    <string name="attach">Attach a document (optional)</string>
+    <string name="attach">Attach an image (optional)</string>
     <string name="select_option">Welcome to To-Do List. Please enter the Group Code to proceed. &#xD;If there is no group with that code, it will be created.</string>
     <string name="nav_todo">To-Do List</string>
     <string name="nav_chat">Group Chat</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
-    <string name="ver">Version 0.1 Beta</string>
+    <string name="ver">Version 0.1 Beta 2</string>
     <string name="site">pshkrh.com</string>
     <string name="select">Select an Option</string>
     <string name="help">Help</string>

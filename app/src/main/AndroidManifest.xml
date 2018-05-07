@@ -26,7 +26,8 @@
         <activity android:name=".GroupCodeActivity" />
         <activity
             android:name=".ChatActivity"
-            android:windowSoftInputMode="stateHidden|adjustPan"/>
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity android:name=".ImageDisplayActivity"></activity>
     </application>
 
 </manifest>
