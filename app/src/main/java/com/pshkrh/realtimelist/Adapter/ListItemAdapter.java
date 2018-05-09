@@ -1,5 +1,7 @@
 package com.pshkrh.realtimelist.Adapter;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -8,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.pshkrh.realtimelist.ImageDisplayActivity;
 import com.pshkrh.realtimelist.MainActivity;
 import com.pshkrh.realtimelist.Model.ToDo;
 import com.pshkrh.realtimelist.R;
@@ -75,9 +78,11 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
         holder.itemTitle.setText(todoList.get(position).getTitle());
         holder.itemDescription.setText(todoList.get(position).getDescription());
         holder.itemUsername.setText(todoList.get(position).getUsername());
+        final Context context = holder.attach.getContext();
+        final String sender = holder.itemUsername.toString();
 
-        String file = holder.fileName = todoList.get(position).getFile();
-        if(file.equals("NONE")){
+        final String file = holder.fileName = todoList.get(position).getFile();
+        if(file != null && file.equals("NONE")){
             holder.attach.setVisibility(View.INVISIBLE);
         }
 
@@ -92,6 +97,16 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
                 mainActivity.idUpdate = todoList.get(position).getId();
                 mainActivity.globalUpdateIndex = todoList.get(position).getPosition(position);
 
+            }
+        });
+
+        holder.attach.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, ImageDisplayActivity.class);
+                intent.putExtra("Url",file);
+                intent.putExtra("Sender",sender);
+                context.startActivity(intent);
             }
         });
     }

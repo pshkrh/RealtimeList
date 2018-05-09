@@ -1,10 +1,12 @@
 package com.pshkrh.realtimelist;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.net.sip.SipSession;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -23,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -42,9 +45,12 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pshkrh.realtimelist.Adapter.ListItemAdapter;
@@ -77,6 +83,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int RC_PHOTO_PICKER =  2;
     private static final int RC_PDF_PICKER = 3;
 
+    private static final int RESULT_OK = 4;
+
     RecyclerView listItem;
     RecyclerView.LayoutManager mLayoutManager;
 
@@ -102,15 +110,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     ImageButton paperclip;
 
-    Uri imageUri;
-    Uri pdfUri;
+    String imageUri="NONE";
 
     String imgName;
     String pdfName;
 
     TextView attachedFile;
+    TextView progressText;
 
-    String finalAttachmentName="NONE";
+    //String finalAttachmentName="NONE";
 
     public DrawerLayout mDrawerLayout;
     public ActionBarDrawerToggle mActionBarDrawerToggle;
@@ -135,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mProgressBar = (ProgressBar)findViewById(R.id.progress_bar);
         attachedFile = (TextView)findViewById(R.id.attached_filename);
+        progressText = (TextView)findViewById(R.id.progress_percent);
 
         mProgressBar.setVisibility(View.INVISIBLE);
 
@@ -150,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //Initialize Firebase Storage
         mFirebaseStorage = FirebaseStorage.getInstance();
-        mDocsStorageReference = mFirebaseStorage.getReference().child("docs");
+        mDocsStorageReference = mFirebaseStorage.getReference().child("docs/");
 
         //Initialize all views
         mAlertDialog = new SpotsDialog(this);
@@ -188,9 +197,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     addTasks(title.getText().toString(),description.getText().toString(),username);
                     title.setText("");
                     description.setText("");
+                    progressText.setText("");
                     attachedFile.setText(getString(R.string.attach));
-                    pdfName="";
-                    imgName="";
+                    imageUri="NONE";
                 }
                 else{
                     updateTasks(title.getText().toString(),description.getText().toString());
@@ -226,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listItem.setLayoutManager(mLayoutManager);
 
         //Firestore Collection Listener
-        db.collection(groupCode)
+        /*db.collection(groupCode)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,
@@ -237,8 +246,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                         Log.d("ToDoList", "Listener Ran");
                         loadTasks();
+                        imageUri="NONE";
                     }
-                });
+                });*/
+
+        loadTasks();
+        load2();
+    }
+
+
+    public String getFileExtension(Uri uri) {
+        ContentResolver cR = getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(cR.getType(uri));
+    }
+
+    public String returnImageUri(){
+        return imageUri;
     }
 
 
@@ -256,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         todo.put("description",description);
         todo.put("username",username);
         todo.put("date", FieldValue.serverTimestamp());
-        todo.put("file",finalAttachmentName);
+        todo.put("file",imageUri);
         db.collection(groupCode).document(id)
                 .set(todo)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -264,7 +288,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     public void onSuccess(Void aVoid) {
                         //Refresh the data
                         Log.d("ToDoList","Added Task");
-                        mListItemAdapter.notifyDataSetChanged();
+                        //mListItemAdapter.notifyDataSetChanged();
+                        //collectionListener();
+                        load2();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -295,7 +321,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         public void onSuccess(Void aVoid) {
                             Toasty.info(MainActivity.this, "Updated Task", Toast.LENGTH_SHORT, true).show();
                             //globalUpdateId = idUpdate;
-                            mListItemAdapter.notifyDataSetChanged();
+                            //mListItemAdapter.notifyDataSetChanged();
+                            //collectionListener();
+                            load2();
                         }
                     });
 
@@ -330,8 +358,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            mListItemAdapter.notifyDataSetChanged();
+                            //mListItemAdapter.notifyDataSetChanged();
                             Toasty.info(MainActivity.this, "Deleted Task", Toast.LENGTH_SHORT, true).show();
+                            //collectionListener();
+                            load2();
                         }
                     });
         }
@@ -351,9 +381,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(!((Activity) mContext).isFinishing()) {
             mAlertDialog.show();
         }
+        //imageUri="NONE";
         if(mToDoList.size()>0){
             mToDoList.clear();
-            mListItemAdapter.notifyDataSetChanged();
+            //mListItemAdapter.notifyDataSetChanged();
             Log.i("ToDoList", "List cleared");
         }
         db.collection(groupCode)
@@ -370,7 +401,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                         document.getString("username"),
                                         document.getString("file"));
 
-                                Log.i("ToDoList", "Adding item to list");
+                                Log.i("ToDoList", "Adding item to list (loadtask)");
                                 mToDoList.add(todo);
                                 //Log.d("ToDoList", document.getId() + " => " + document.getData());
                             }
@@ -385,6 +416,85 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 });
     }
+
+    //
+    //
+    // Load Task 2
+    //
+    //
+
+    public void load2(){
+        db.collection(groupCode)
+                .orderBy("date", Query.Direction.DESCENDING)
+                .addSnapshotListener(this, new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        mToDoList.clear();
+                        Log.i("ToDoList","List cleared in load2");
+                        if (e != null) {
+                            Log.w("ToDoList", "Listen failed.", e);
+                            return;
+                        }
+
+                        //List<String> cities = new ArrayList<>();
+                        for (QueryDocumentSnapshot doc : value) {
+                            if (doc.get("id") != null) {
+                                ToDo test = new ToDo(doc.get("id").toString(),doc.get("title").toString(),doc.get("description").toString(),doc.get("username").toString(),doc.get("file").toString());
+                                mToDoList.add(test);
+                            }
+                        }
+                        mListItemAdapter = new ListItemAdapter(MainActivity.this,mToDoList);
+                        listItem.setAdapter(mListItemAdapter);
+                        mAlertDialog.dismiss();
+                        Log.d("ToDoList", "Load2 Ran");
+                    }
+                });
+    }
+
+    //
+    //
+    // Collection Listener Function
+    //
+    //
+
+    public void collectionListener() {
+        db.collection(groupCode)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot snapshots,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w("ToDoList", "listen:error", e);
+                            return;
+                        }
+
+                        for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    Map<String,Object> m = dc.getDocument().getData();
+                                    Log.i("ToDoList",m.get("Title").toString());
+                                    //mToDoList.add();
+                                    break;
+                            }
+                        }
+
+                    }
+                });
+    }
+                /*.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w("ToDoList", "Listen failed.", e);
+                            return;
+                        }
+                        Log.d("ToDoList", "Listener Ran");
+                        loadTasks();
+                        imageUri="NONE";
+                    }
+                });*/
 
     //
     //
@@ -421,16 +531,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             final Uri selectedImageUri = data.getData();
             StorageReference photoRef = mDocsStorageReference.child(selectedImageUri.getLastPathSegment());
 
-            photoRef.putFile(selectedImageUri).addOnSuccessListener
+            photoRef.putFile(selectedImageUri)
+                    .addOnSuccessListener
                     (this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             mProgressBar.setVisibility(View.GONE);
-                            fab.setEnabled(true);
-                            imageUri = taskSnapshot.getDownloadUrl();
+                            fab.setVisibility(View.VISIBLE);
+                            imageUri = taskSnapshot.getDownloadUrl().toString();
+                            Toasty.success(mContext, "File Uploaded Successfully!", Toast.LENGTH_SHORT).show();
+
                             imgName = selectedImageUri.getLastPathSegment();
-                            finalAttachmentName = imgName;
+                            //finalAttachmentName = imgName;
                             attachedFile.setText(imgName);
+                            progressText.setText("");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            mProgressBar.setVisibility(View.GONE);
+                            fab.setVisibility(View.VISIBLE);
+                            imageUri="NONE";
+                            Toasty.error(mContext, "Upload failed, please try again", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                            String per = ((int) progress) + "%";
+                            progressText.setText(per);
                         }
                     });
         }
