@@ -83,6 +83,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int RC_PHOTO_PICKER =  2;
     private static final int RC_PDF_PICKER = 3;
 
+    private int FLAG = 0;
+
     private static final int RESULT_OK = 4;
 
     RecyclerView listItem;
@@ -250,8 +252,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 });*/
 
-        loadTasks();
         load2();
+        //loadTasks();
     }
 
 
@@ -409,6 +411,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             listItem.setAdapter(mListItemAdapter);
                             mAlertDialog.dismiss();
                             Log.d("ToDoList","LoadTask ran");
+                            FLAG=1;
 
                         } else {
                             Log.d("ToDoList", "Error getting documents: ", task.getException());
@@ -424,33 +427,80 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //
 
     public void load2(){
-        db.collection(groupCode)
+        //if(FLAG==1) {
+            db.collection(groupCode)
+                    .orderBy("date", Query.Direction.DESCENDING)
+                    .addSnapshotListener(this, new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable QuerySnapshot value,
+                                            @Nullable FirebaseFirestoreException e) {
+                            mToDoList.clear();
+                            Log.i("ToDoList", "List cleared in load2");
+                            if (e != null) {
+                                Log.w("ToDoList", "Listen failed.", e);
+                                return;
+                            }
+
+                            //List<String> cities = new ArrayList<>();
+                            for (QueryDocumentSnapshot doc : value) {
+                                if (doc.get("id") != null) {
+                                    ToDo test = new ToDo(doc.get("id").toString(), doc.get("title").toString(), doc.get("description").toString(), doc.get("username").toString(), doc.get("file").toString());
+                                    mToDoList.add(test);
+                                }
+                            }
+                            mListItemAdapter = new ListItemAdapter(MainActivity.this, mToDoList);
+                            listItem.setAdapter(mListItemAdapter);
+                            mAlertDialog.dismiss();
+                            Log.d("ToDoList", "Load2 Ran");
+                        }
+                    });
+       // }
+    }
+
+    /*public void load3(){
+        db.collection("cities")
                 .orderBy("date", Query.Direction.DESCENDING)
                 .addSnapshotListener(this, new EventListener<QuerySnapshot>() {
                     @Override
-                    public void onEvent(@Nullable QuerySnapshot value,
+                    public void onEvent(@Nullable QuerySnapshot snapshots,
                                         @Nullable FirebaseFirestoreException e) {
+
                         mToDoList.clear();
-                        Log.i("ToDoList","List cleared in load2");
+                        Log.i("ToDoList", "List cleared in load3");
                         if (e != null) {
                             Log.w("ToDoList", "Listen failed.", e);
                             return;
                         }
 
-                        //List<String> cities = new ArrayList<>();
-                        for (QueryDocumentSnapshot doc : value) {
-                            if (doc.get("id") != null) {
-                                ToDo test = new ToDo(doc.get("id").toString(),doc.get("title").toString(),doc.get("description").toString(),doc.get("username").toString(),doc.get("file").toString());
-                                mToDoList.add(test);
+                        for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                            switch (dc.getType()) {
+
+                                case ADDED:
+                                    QueryDocumentSnapshot doc = dc.getDocument();
+                                    ToDo test = new ToDo(doc.get("id").toString(), doc.get("title").toString(), doc.get("description").toString(), doc.get("username").toString(), doc.get("file").toString());
+                                    mToDoList.add(test);
+                                    break;
+                                case MODIFIED:
+                                    loadTasks();
+                                    Log.d("ToDoList", "Modified: " + dc.getDocument().getData());
+                                    break;
+                                case REMOVED:
+                                    loadTasks();
+                                    Log.d("ToDoList", "Removed: " + dc.getDocument().getData());
+                                    break;
                             }
                         }
-                        mListItemAdapter = new ListItemAdapter(MainActivity.this,mToDoList);
+
+                        mListItemAdapter = new ListItemAdapter(MainActivity.this, mToDoList);
                         listItem.setAdapter(mListItemAdapter);
                         mAlertDialog.dismiss();
-                        Log.d("ToDoList", "Load2 Ran");
+                        Log.d("ToDoList", "Load3 Ran");
+
                     }
                 });
-    }
+    }*/
+
+
 
     //
     //
