@@ -41,6 +41,8 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 import java.util.List;
 
+import es.dmoral.toasty.Toasty;
+
 public class ChatActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "ChatActivity";
@@ -59,6 +61,7 @@ public class ChatActivity extends AppCompatActivity implements NavigationView.On
     private ImageButton mSendButton;
     private String mUsername;
     private String groupCode;
+    private int disableProgress = 0;
 
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mMessagesDatabaseReference;
@@ -95,10 +98,14 @@ public class ChatActivity extends AppCompatActivity implements NavigationView.On
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mMessagesDatabaseReference = mFirebaseDatabase.getReference().child(groupCode);
 
-        attachReadListener();
-
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mProgressBar.setVisibility(View.VISIBLE);
+
+        attachReadListener();
+
+        if(disableProgress==1){
+            mProgressBar.setVisibility(View.INVISIBLE);
+        }
 
         mMessageEditText = (MaterialEditText) findViewById(R.id.chat_edittext);
         mSendButton = (ImageButton) findViewById(R.id.send_button);
@@ -179,6 +186,10 @@ public class ChatActivity extends AppCompatActivity implements NavigationView.On
                 public void onCancelled(DatabaseError databaseError) {}
             };
             mMessagesDatabaseReference.addChildEventListener(mChildEventListener);
+        }
+        if(chatList.size()<=0){
+            Toasty.info(mContext, "There are no chat messages!", Toast.LENGTH_SHORT).show();
+            disableProgress=1;
         }
     }
 
