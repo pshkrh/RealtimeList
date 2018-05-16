@@ -64,6 +64,7 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
     public ListItemAdapter(MainActivity mainActivity, List<ToDo> todoList) {
         this.mainActivity = mainActivity;
         this.todoList = todoList;
+        this.setHasStableIds(true);
     }
 
     @Override
@@ -114,5 +115,15 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
     @Override
     public int getItemCount() {
         return todoList.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 }
