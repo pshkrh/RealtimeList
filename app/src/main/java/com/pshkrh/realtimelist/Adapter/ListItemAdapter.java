@@ -14,6 +14,7 @@ import com.pshkrh.realtimelist.ImageDisplayActivity;
 import com.pshkrh.realtimelist.MainActivity;
 import com.pshkrh.realtimelist.Model.ToDo;
 import com.pshkrh.realtimelist.R;
+import com.rengwuxian.materialedittext.MaterialEditText;
 
 import java.util.List;
 
@@ -46,13 +47,14 @@ class ListItemViewHolder extends RecyclerView.ViewHolder implements View.OnClick
 
     @Override
     public void onClick(View view) {
-        mItemClickListener.onClick(view,getAdapterPosition(),false);
+        //mItemClickListener.onClick(view,getAdapterPosition());
     }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         menu.setHeaderTitle("Select an action");
-        menu.add(0,0,getAdapterPosition(),"Delete Task");
+        menu.add(0,0,getAdapterPosition(),"Edit Task");
+        menu.add(1,1,getAdapterPosition(),"Delete Task");
     }
 }
 
@@ -87,19 +89,21 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder> {
             holder.attach.setVisibility(View.INVISIBLE);
         }
 
-        holder.setItemClickListener(new ItemClickListener() {
+        /*holder.setItemClickListener(new ItemClickListener() {
             @Override
-            public void onClick(View view, int position, boolean isLongClick) {
+            public void onClick(View view, int position) {
                 //When user taps the card, the text enters the MaterialEditText above
-                mainActivity.title.setText(todoList.get(position).getTitle());
-                mainActivity.description.setText(todoList.get(position).getDescription());
+                mainActivity.updateTitle = todoList.get(position).getTitle();
+                mainActivity.updateDescription = todoList.get(position).getDescription();
+                //mainActivity.title.setText(todoList.get(position).getTitle());
+                //mainActivity.description.setText(todoList.get(position).getDescription());
 
-                    mainActivity.isUpdate = true;
-                mainActivity.idUpdate = todoList.get(position).getId();
-                mainActivity.globalUpdateIndex = todoList.get(position).getPosition(position);
+                //mainActivity.isUpdate = true;
+                //mainActivity.idUpdate = todoList.get(position).getId();
+               // mainActivity.globalUpdateIndex = todoList.get(position).getPosition(position);
 
             }
-        });
+        });*/
 
         holder.attach.setOnClickListener(new View.OnClickListener() {
             @Override

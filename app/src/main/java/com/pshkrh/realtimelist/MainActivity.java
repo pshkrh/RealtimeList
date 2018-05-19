@@ -117,6 +117,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     String imgName;
     String pdfName;
 
+    public String updateTitle="";
+    public String updateDescription="";
+
     TextView attachedFile;
     TextView progressText;
 
@@ -197,16 +200,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         mAlertDialog.show();
                     }
                     addTasks(title.getText().toString(),description.getText().toString(),username);
-                    title.setText("");
-                    description.setText("");
-                    progressText.setText("");
-                    attachedFile.setText(getString(R.string.attach));
-                    imageUri="NONE";
                 }
                 else{
                     updateTasks(title.getText().toString(),description.getText().toString());
                     isUpdate = !isUpdate;
                 }
+                title.setText("");
+                description.setText("");
+                progressText.setText("");
+                attachedFile.setText(getString(R.string.attach));
+                imageUri="NONE";
+                isUpdate=false;
             }
         });
 
@@ -558,6 +562,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onContextItemSelected(MenuItem item) {
         if(item.getTitle().equals("Delete Task")){
             deleteTasks(item.getOrder());
+        }
+        else if(item.getTitle().equals("Edit Task")){
+            isUpdate = true;
+            int index = item.getOrder();
+            idUpdate = mToDoList.get(index).getId();
+            updateTitle = mToDoList.get(index).title;
+            if(!updateTitle.equals("")){
+                title.setText(updateTitle);
+            }
+            updateDescription = mToDoList.get(index).description;
+            if(!updateDescription.equals("")){
+                description.setText(updateDescription);
+            }
         }
         return super.onContextItemSelected(item);
     }
