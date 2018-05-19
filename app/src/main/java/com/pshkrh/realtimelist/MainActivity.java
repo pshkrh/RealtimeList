@@ -550,6 +550,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 });*/
 
+
+    //
+    //
+    // Edit Mode
+    //
+    //
+
+    public void enableEditMode(){}
+
+    public void disableEditMode(){}
+
     //
     //
     //Override Methods
@@ -575,6 +586,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if(!updateDescription.equals("")){
                 description.setText(updateDescription);
             }
+
+            enableEditMode();
         }
         return super.onContextItemSelected(item);
     }
