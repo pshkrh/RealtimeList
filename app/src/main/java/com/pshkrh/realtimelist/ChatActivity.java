@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -70,6 +71,8 @@ public class ChatActivity extends AppCompatActivity implements NavigationView.On
     public DrawerLayout mDrawerLayout;
     public ActionBarDrawerToggle mActionBarDrawerToggle;
 
+    public String userImageUrl;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,15 +88,24 @@ public class ChatActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = (NavigationView)findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
         navigationView.setCheckedItem(R.id.nav_chat);
+
+        View hView =  navigationView.getHeaderView(0);
+        TextView navUser = (TextView)hView.findViewById(R.id.nav_username);
 
         groupCode = getIntent().getStringExtra("Group Code");
         mUsername = getIntent().getStringExtra("Username");
+        navUser.setText(mUsername);
 
         String groupName = groupCode + "'s Group Chat";
 
         setTitle(groupName);
+
+        userImageUrl = getIntent().getStringExtra("Image Url");
+
+        if(userImageUrl != null){
+            displayImage(userImageUrl);
+        }
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mMessagesDatabaseReference = mFirebaseDatabase.getReference().child(groupCode);
@@ -151,6 +163,13 @@ public class ChatActivity extends AppCompatActivity implements NavigationView.On
     /*
     Required Methods
      */
+
+    public void displayImage(String imageUrl){
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View hView =  navigationView.getHeaderView(0);
+        new DownloadImageTask((ImageView)hView.findViewById(R.id.imageView))
+                .execute(imageUrl);
+    }
 
     private void onSignedInInitialize(String username){
         mUsername = username;

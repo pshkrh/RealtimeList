@@ -13,20 +13,22 @@
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp" />
+        android:paddingTop="8dp"
+        android:src="@drawable/ic_person_black_24dp"
+        android:scaleType="fitXY"/>
     <!-- app:srcCompat="@drawable/navlogo" /> -->
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="8dp"
-        android:text="@string/ver"
+        android:text="@string/signed_in_as"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/nav_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/site" />
+        android:text="@string/anonymous"/>
 
 </LinearLayout>

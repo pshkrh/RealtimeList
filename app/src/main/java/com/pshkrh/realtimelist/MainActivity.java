@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -123,6 +124,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     TextView attachedFile;
     TextView progressText;
 
+    public String userImageUrl;
+
+
     //String finalAttachmentName="NONE";
 
     public DrawerLayout mDrawerLayout;
@@ -143,8 +147,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = (NavigationView)findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
         navigationView.setCheckedItem(R.id.nav_todo);
+
 
         mProgressBar = (ProgressBar)findViewById(R.id.progress_bar);
         attachedFile = (TextView)findViewById(R.id.attached_filename);
@@ -155,9 +159,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //Get username and group code from SplashActivity's Intent
         username = getIntent().getStringExtra("Username");
         if(username == null){
+            Toasty.error(mContext, "Username has not been set correctly.", Toast.LENGTH_SHORT).show();
             username = ANONYMOUS;
         }
+        View hView =  navigationView.getHeaderView(0);
+        TextView navUser = (TextView)hView.findViewById(R.id.nav_username);
+        navUser.setText(username);
+
         groupCode = getIntent().getStringExtra("groupCode");
+
+        userImageUrl = getIntent().getStringExtra("Image Url");
+
+        if(userImageUrl != null){
+            displayImage(userImageUrl);
+        }
+
+        String groupName = groupCode + "'s To-Do List";
+
+        setTitle(groupName);
 
         //Initialize Firestore
         db = FirebaseFirestore.getInstance();
@@ -560,6 +579,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void enableEditMode(){}
 
     public void disableEditMode(){}
+
+    //
+    //
+    // Display User Image in Navigation View
+    //
+    //
+
+    public void displayImage(String imageUrl){
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View hView =  navigationView.getHeaderView(0);
+        new DownloadImageTask((ImageView)hView.findViewById(R.id.imageView))
+                .execute(imageUrl);
+    }
 
     //
     //

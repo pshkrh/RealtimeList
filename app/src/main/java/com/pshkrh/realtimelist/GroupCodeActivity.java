@@ -22,12 +22,14 @@ public class GroupCodeActivity extends AppCompatActivity {
     public static final String ANONYMOUS = "Anonymous";
     private static final String TAG = "SelectActivity";
     private String mUsername;
+    public String imgUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_code);
         mUsername = getIntent().getStringExtra("Username");
+        imgUrl = getIntent().getStringExtra("Image Url");
 
         Button chatBtn = (Button) findViewById(R.id.button2);
         final EditText edit = (EditText) findViewById(R.id.editText);
@@ -42,6 +44,7 @@ public class GroupCodeActivity extends AppCompatActivity {
                     Intent intent = new Intent(GroupCodeActivity.this, MainActivity.class);
                     intent.putExtra("groupCode", txt);
                     intent.putExtra("Username", mUsername);
+                    intent.putExtra("Image Url", imgUrl);
                     startActivity(intent);
                     finish();
                 }

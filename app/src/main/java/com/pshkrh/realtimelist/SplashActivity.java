@@ -46,12 +46,12 @@ public class SplashActivity extends AppCompatActivity {
                             onSignedInInit(user.getDisplayName());
                             Intent intent = new Intent(SplashActivity.this, GroupCodeActivity.class);
                             intent.putExtra("Username", mUsername);
+                            intent.putExtra("Image Url", user.getPhotoUrl());
                             startActivity(intent);
                             finish();
                         } else {
                             //Signed out
                             onSignedOutCleanup();
-                            mUsername = ANONYMOUS;
                             startActivityForResult(
                                     AuthUI.getInstance()
                                             .createSignInIntentBuilder()
@@ -104,5 +104,6 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        //mFirebaseAuth.addAuthStateListener(mAuthStateListener);
     }
 }

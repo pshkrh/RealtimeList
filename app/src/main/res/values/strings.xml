@@ -27,4 +27,6 @@
     <string name="group_chat">\'s Group Chat</string>
     <string name="enter_msg">Enter a message</string>
     <string name="under_text">The Realtime To-Do List and Chat App</string>
+    <string name="signed_in_as">Signed in as:</string>
+    <string name="anonymous">Anonymous User</string>
 </resources>
