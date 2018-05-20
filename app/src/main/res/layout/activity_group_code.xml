@@ -8,7 +8,9 @@
     android:layout_centerInParent="true"
     android:layout_gravity="center"
     android:orientation="vertical"
-    tools:context="com.pshkrh.realtimelist.GroupCodeActivity">
+    tools:context="com.pshkrh.realtimelist.GroupCodeActivity"
+    android:fitsSystemWindows="true"
+    android:theme="@style/AppTheme2">
 
 
     <TextView
