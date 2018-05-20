@@ -2,6 +2,7 @@ package com.pshkrh.realtimelist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -24,7 +25,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -94,17 +98,23 @@ public class ChatActivity extends AppCompatActivity implements NavigationView.On
         TextView navUser = (TextView)hView.findViewById(R.id.nav_username);
 
         groupCode = getIntent().getStringExtra("Group Code");
-        mUsername = getIntent().getStringExtra("Username");
+        //mUsername = getIntent().getStringExtra("Username");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        mUsername = user.getDisplayName();
         navUser.setText(mUsername);
 
         String groupName = groupCode + "'s Group Chat";
 
         setTitle(groupName);
 
-        userImageUrl = getIntent().getStringExtra("Image Url");
+        Uri userImg = user.getPhotoUrl();
+        ImageView img = (ImageView)hView.findViewById(R.id.imageView);
 
-        if(userImageUrl != null){
-            displayImage(userImageUrl);
+        if(userImg != null){
+            Glide.with(mContext)
+                    .load(userImg)
+                    .into(img);
+            //displayImage(userImageUrl);
         }
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();

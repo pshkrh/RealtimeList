@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.Image;
 import android.net.Uri;
 import android.net.sip.SipSession;
 import android.support.annotation.NonNull;
@@ -32,11 +33,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
@@ -74,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     List<ToDo> mToDoList = new ArrayList<>();
     FirebaseFirestore db;
     FirebaseUser user;
+    private FirebaseAuth mFirebaseAuth;
 
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mDocsStorageReference;
@@ -157,7 +161,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mProgressBar.setVisibility(View.INVISIBLE);
 
         //Get username and group code from SplashActivity's Intent
-        username = getIntent().getStringExtra("Username");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        username = user.getDisplayName();
+        //username = getIntent().getStringExtra("Username");
         if(username == null){
             Toasty.error(mContext, "Username has not been set correctly.", Toast.LENGTH_SHORT).show();
             username = ANONYMOUS;
@@ -168,10 +174,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         groupCode = getIntent().getStringExtra("groupCode");
 
-        userImageUrl = getIntent().getStringExtra("Image Url");
+        //userImageUrl = getIntent().getStringExtra("Image Url");
+        Uri userImg = user.getPhotoUrl();
+        ImageView img = (ImageView)hView.findViewById(R.id.imageView);
 
-        if(userImageUrl != null){
-            displayImage(userImageUrl);
+        if(userImg != null){
+            Glide.with(mContext)
+                    .load(userImg)
+                    .into(img);
+            //displayImage(userImageUrl);
         }
 
         String groupName = groupCode + "'s To-Do List";
