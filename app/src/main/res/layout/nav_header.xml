@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="150dp"
+    android:layout_height="@dimen/navDrawer_header_height"
     android:background="@drawable/image_navbar"
     android:gravity="bottom"
     android:orientation="vertical"
@@ -11,11 +11,9 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imageView"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:paddingTop="8dp"
-        app:civ_border_width="1dp"
-        app:civ_border_color="#FFFFFFFF"/>
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:paddingTop="8dp" />
 
     <TextView
         android:layout_width="match_parent"

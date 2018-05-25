@@ -82,4 +82,5 @@ public class ImageDisplayActivity extends AppCompatActivity {
         onBackPressed();
         return true;
     }
+
 }

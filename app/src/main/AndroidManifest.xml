@@ -32,7 +32,7 @@
             android:windowSoftInputMode="stateHidden|adjustPan" />
         <activity
             android:name=".ImageDisplayActivity"
-            android:theme="@style/ImageDisplayTheme"/>
+            android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>
