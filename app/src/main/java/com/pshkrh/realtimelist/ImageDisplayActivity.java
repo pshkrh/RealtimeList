@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -28,10 +29,17 @@ public class ImageDisplayActivity extends AppCompatActivity {
     String imgTitle;
     ProgressBar mProgressBar;
 
+    Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_display);
+
+        toolbar = (Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         imgTitle = "Attached Image";
         setTitle(imgTitle);
@@ -46,7 +54,6 @@ public class ImageDisplayActivity extends AppCompatActivity {
 
         String url = getIntent().getStringExtra("Url");
         ImageView img = (ImageView)findViewById(R.id.img_pic);
-        TextView txt = (TextView)findViewById(R.id.img_title);
 
         Glide.with(mContext)
                 .load(url)
@@ -68,5 +75,11 @@ public class ImageDisplayActivity extends AppCompatActivity {
                 )
                 .into(img);
 
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

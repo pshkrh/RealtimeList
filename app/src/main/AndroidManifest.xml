@@ -30,7 +30,9 @@
         <activity
             android:name=".ChatActivity"
             android:windowSoftInputMode="stateHidden|adjustPan" />
-        <activity android:name=".ImageDisplayActivity"></activity>
+        <activity
+            android:name=".ImageDisplayActivity"
+            android:theme="@style/ImageDisplayTheme"/>
     </application>
 
 </manifest>
