@@ -180,15 +180,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         groupCode = getIntent().getStringExtra("groupCode");
 
-        //userImageUrl = getIntent().getStringExtra("Image Url");
+        //Load the User's Profile Photo
         Uri userImg = user.getPhotoUrl();
-        ImageView img = (ImageView)hView.findViewById(R.id.imageView);
 
-        if(userImg != null){
+        if(userImg != null) {
+            String photoUrl = userImg.toString();
+            //Modify the Image Resolution with some URL changes
+            String original = "s96-c/photo.jpg";
+            String replacement = "s400-c/photo.jpg";
+
+            photoUrl = photoUrl.replace(original, replacement);
+
+            ImageView img = (ImageView) hView.findViewById(R.id.imageView);
+
             Glide.with(mContext)
-                    .load(userImg)
+                    .load(photoUrl)
                     .into(img);
-            //displayImage(userImageUrl);
         }
 
         String groupName = groupCode + "'s To-Do List";
@@ -614,8 +621,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //
     //Override Methods
     //
-    //
-
 
 
     @Override
